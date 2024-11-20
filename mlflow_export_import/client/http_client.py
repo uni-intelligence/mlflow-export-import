@@ -233,6 +233,18 @@ class MlflowHttpClient(HttpClient):
     def __init__(self, host=None, token=None):
         super().__init__("api/2.0/mlflow", host, token)
 
+    def get(self, resource, params=None):
+        uri = self._mk_uri(resource)
+        rsp = requests.get(uri, headers=self._mk_headers(), params=params, timeout=_TIMEOUT)
+        checked_response = self._check_response(rsp, params)
+        return self._json_loads(checked_response, params)
+
+    def _mk_headers(self):
+        headers = { "User-Agent": USER_AGENT, "Content-Type": "application/json" }
+        if self.token:
+            headers["Authorization"] = f"Basic {self.token}"
+        return headers
+
 
 @click.command()
 @click.option("--api",
